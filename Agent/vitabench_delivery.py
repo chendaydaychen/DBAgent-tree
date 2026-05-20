@@ -189,6 +189,24 @@ def _find_store_and_product_ids(task: Dict[str, Any]) -> Tuple[str, str]:
     return str(order.get("store_id", "")), product_id
 
 
+def _expected_product_profile(task: Dict[str, Any]) -> Dict[str, Any]:
+    order = _required_order(task)
+    order_products = order.get("products", []) or []
+    if not order_products:
+        return {}
+    target_product = dict(order_products[0])
+    store_id = str(order.get("store_id", ""))
+    product_id = str(target_product.get("product_id", ""))
+    store = task.get("environment", {}).get("stores", {}).get(store_id, {}) or {}
+    for product in store.get("products", []) or []:
+        if str(product.get("product_id", "")) == product_id:
+            profile = dict(product)
+            profile["expected_quantity"] = target_product.get("quantity")
+            profile["expected_attributes"] = target_product.get("attributes")
+            return profile
+    return target_product
+
+
 def _order_array_from_submit_args(args: Dict[str, Any]) -> Tuple[Optional[Any], Optional[str]]:
     if not args:
         return None, None
@@ -216,6 +234,35 @@ def _parse_json_safely(raw: Any, default: Any) -> Any:
         return json.loads(raw)
     except Exception:
         return default
+
+
+def _normalized_tokens(value: Any) -> List[str]:
+    text = str(value or "").strip().lower()
+    tokens = []
+    current = []
+    for ch in text:
+        if ch.isalnum():
+            current.append(ch)
+            continue
+        if current:
+            tokens.append("".join(current))
+            current = []
+        if not ch.isspace():
+            tokens.append(ch)
+    if current:
+        tokens.append("".join(current))
+    return tokens
+
+
+def _jaccard_similarity(left: Sequence[str], right: Sequence[str]) -> float:
+    left_set = set(token for token in left if token)
+    right_set = set(token for token in right if token)
+    if not left_set and not right_set:
+        return 0.0
+    union = left_set | right_set
+    if not union:
+        return 0.0
+    return float(len(left_set & right_set)) / float(len(union))
 
 
 def _available_product_ids(stores: Dict[str, Any]) -> List[str]:
@@ -613,13 +660,61 @@ def _candidate_payload(store_id: str, expected_order: Dict[str, Any], attempt: i
     }
 
 
-def _candidate_product_from_store(store_detail: Dict[str, Any], expected_product_id: str) -> Dict[str, Any]:
-    if not expected_product_id:
-        return {}
+def _candidate_product_from_store(
+    store_detail: Dict[str, Any],
+    expected_product_id: str,
+    expected_product_profile: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    expected_product_profile = expected_product_profile or {}
+    expected_name_tokens = _normalized_tokens(expected_product_profile.get("name", ""))
+    expected_tag_tokens = [
+        str(tag).strip().lower()
+        for tag in (expected_product_profile.get("tags", []) or [])
+        if str(tag).strip()
+    ]
+    expected_attr_tokens = _normalized_tokens(
+        expected_product_profile.get("expected_attributes", expected_product_profile.get("attributes", ""))
+    )
+    expected_price = expected_product_profile.get("price")
+
+    best_product = {}
+    best_score = -1.0
     for product in (store_detail.get("products") or []):
-        if str(product.get("product_id", "")) == expected_product_id:
-            return dict(product)
-    return {}
+        score = 0.0
+        product_id = str(product.get("product_id", ""))
+        if expected_product_id and product_id == expected_product_id:
+            score += 4.0
+
+        name_similarity = _jaccard_similarity(
+            _normalized_tokens(product.get("name", "")),
+            expected_name_tokens,
+        )
+        score += 3.0 * name_similarity
+
+        product_tags = [
+            str(tag).strip().lower()
+            for tag in (product.get("tags", []) or [])
+            if str(tag).strip()
+        ]
+        score += 1.5 * _jaccard_similarity(product_tags, expected_tag_tokens)
+        score += 0.5 * _jaccard_similarity(
+            _normalized_tokens(product.get("attributes", "")),
+            expected_attr_tokens,
+        )
+        try:
+            if product.get("price") is not None and expected_price is not None:
+                price_gap = abs(float(product.get("price")) - float(expected_price))
+                denom = max(abs(float(expected_price)), 1.0)
+                score += max(0.0, 1.0 - min(price_gap / denom, 1.0))
+        except Exception:
+            pass
+
+        if score > best_score:
+            best_score = score
+            best_product = dict(product)
+            best_product["_match_score"] = score
+            best_product["_name_similarity"] = name_similarity
+    return best_product
 
 
 def _candidate_summary_payload(
@@ -628,8 +723,13 @@ def _candidate_summary_payload(
     store_detail: Dict[str, Any],
     expected_order: Dict[str, Any],
     expected_product_id: str,
+    expected_product_profile: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    matched_product = _candidate_product_from_store(store_detail, expected_product_id)
+    matched_product = _candidate_product_from_store(
+        store_detail,
+        expected_product_id,
+        expected_product_profile=expected_product_profile,
+    )
     expected_total_price = expected_order.get("total_price")
     matched_price = matched_product.get("price") if matched_product else None
     price_gap = None
@@ -645,14 +745,18 @@ def _candidate_summary_payload(
         "store_tags": list(store_detail.get("tags", []) or []),
         "product_count": len(store_detail.get("products", []) or []),
         "matched_product_id": str(matched_product.get("product_id", "")) if matched_product else "",
+        "matched_product_name": str(matched_product.get("name", "")) if matched_product else "",
         "matched_product_price": matched_price,
         "expected_total_price": expected_total_price,
         "price_gap": price_gap,
-        "has_expected_product": bool(matched_product),
+        "match_score": float(matched_product.get("_match_score", 0.0) or 0.0),
+        "name_similarity": float(matched_product.get("_name_similarity", 0.0) or 0.0),
+        "has_expected_product": bool(matched_product) and str(matched_product.get("product_id", "")) == expected_product_id,
     }
 
 
-def _candidate_rank_key(payload: Dict[str, Any]) -> Tuple[int, float, int, str]:
+def _candidate_rank_key(payload: Dict[str, Any]) -> Tuple[float, int, float, int, str]:
+    match_score = float(payload.get("match_score", 0.0) or 0.0)
     has_expected_product = 1 if payload.get("has_expected_product") else 0
     price_gap = payload.get("price_gap")
     if price_gap is None:
@@ -661,6 +765,7 @@ def _candidate_rank_key(payload: Dict[str, Any]) -> Tuple[int, float, int, str]:
     attempt = int(payload.get("candidate_attempt", 0) or 0)
     store_id = str(payload.get("candidate_store_id", ""))
     return (
+        -match_score,
         -has_expected_product,
         float(price_gap),
         -product_count,
@@ -883,6 +988,49 @@ def _reference_agent_run(
     txn_attempts = 0
     interference_bumps = 0
     hotspot_key = _hotspot_key(namespace) if contention_profile == "hotspot" else ""
+    expected_product_profile = _expected_product_profile(task)
+    winner_store_id = ""
+    branch_count = 0
+    explore_txn_attempts = 0
+    winner_txn_attempts = 0
+    winner_commit_rounds = 0
+    winner_selection_latency_sec = 0.0
+    explore_phase_latency_sec = 0.0
+    commit_phase_latency_sec = 0.0
+
+    def _build_agent_result(
+        submit_ok: bool,
+        final_answer: Optional[Any],
+        final_answer_raw: Optional[str],
+        selected_store_id: str,
+        abort_reason_override: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        return {
+            "mode": mode,
+            "messages": messages,
+            "tool_trace": trace,
+            "db_retry_count": retry_count,
+            "db_abort_count": abort_count,
+            "db_abort_rate_per_attempt": float(abort_count) / float(max(txn_attempts, 1)),
+            "abort_reasons": abort_reasons,
+            "db_abort_reason": abort_reason_override if abort_reason_override is not None else abort_reason,
+            "submit_ok": submit_ok,
+            "final_answer": final_answer,
+            "final_answer_raw": final_answer_raw,
+            "selected_store_id": selected_store_id,
+            "txn_attempts": txn_attempts,
+            "rolled_back_attempts": rolled_back_attempts,
+            "committed_attempts": committed_attempts,
+            "candidate_count": len(candidate_store_ids),
+            "branch_count": branch_count,
+            "explore_txn_attempts": explore_txn_attempts,
+            "winner_txn_attempts": winner_txn_attempts,
+            "winner_commit_rounds": winner_commit_rounds,
+            "winner_selection_latency_sec": winner_selection_latency_sec,
+            "explore_phase_latency_sec": explore_phase_latency_sec,
+            "commit_phase_latency_sec": commit_phase_latency_sec,
+            "interference_bumps": interference_bumps,
+        }
 
     _record_tool(
         trace,
@@ -900,33 +1048,19 @@ def _reference_agent_run(
     )
     candidate_stores = stores_result.get("stores", []) if stores_result.get("ok") else []
     candidate_store_ids = _choose_candidate_store_ids(candidate_stores, expected_store_id, top_k)
+    branch_count = len(candidate_store_ids)
     if not candidate_store_ids:
-        return {
-            "mode": mode,
-            "messages": messages,
-            "tool_trace": trace,
-            "db_retry_count": 0,
-            "db_abort_count": 0,
-            "abort_reasons": [],
-            "db_abort_reason": "NO_CANDIDATE_STORE",
-            "submit_ok": False,
-            "final_answer": None,
-            "final_answer_raw": None,
-            "selected_store_id": "",
-            "txn_attempts": 0,
-            "rolled_back_attempts": 0,
-            "committed_attempts": 0,
-            "candidate_count": 0,
-            "interference_bumps": 0,
-        }
+        return _build_agent_result(False, None, None, "", abort_reason_override="NO_CANDIDATE_STORE")
 
     if mode == "baseline":
         candidate_payloads = []
         meta_key = task_key(namespace, "meta:task")
         product_key = task_key(namespace, "product:{}:detail".format(expected_product_id))
+        explore_phase_started = time.time()
         for attempt_idx, store_id in enumerate(candidate_store_ids, 1):
             store_key = task_key(namespace, "store:{}:detail".format(store_id))
             txn_attempts += 1
+            explore_txn_attempts += 1
             start_result = _record_tool(trace, messages, "tx_start", {}, tx_start({}))
             if not start_result.get("ok"):
                 abort_count += 1
@@ -946,6 +1080,7 @@ def _reference_agent_run(
                     store_detail=store_detail if isinstance(store_detail, dict) else {},
                     expected_order=expected_order,
                     expected_product_id=expected_product_id,
+                    expected_product_profile=expected_product_profile,
                 )
                 candidate_payloads.append(candidate_payload)
                 candidate_key = _build_attempt_candidate_key(namespace, attempt_idx)
@@ -960,33 +1095,22 @@ def _reference_agent_run(
             except Exception:
                 pass
 
+        explore_phase_latency_sec = time.time() - explore_phase_started
+        winner_selection_started = time.time()
         winner_payload = _select_winner_payload(candidate_payloads)
+        winner_selection_latency_sec = time.time() - winner_selection_started
         winner_store_id = str(winner_payload.get("candidate_store_id", "")) if winner_payload else ""
         if not winner_store_id:
-            return {
-                "mode": mode,
-                "messages": messages,
-                "tool_trace": trace,
-                "db_retry_count": retry_count,
-                "db_abort_count": abort_count,
-                "abort_reasons": abort_reasons,
-                "db_abort_reason": abort_reason or "NO_WINNER_SELECTED",
-                "submit_ok": False,
-                "final_answer": None,
-                "final_answer_raw": None,
-                "selected_store_id": "",
-                "txn_attempts": txn_attempts,
-                "rolled_back_attempts": rolled_back_attempts,
-                "committed_attempts": committed_attempts,
-                "candidate_count": len(candidate_store_ids),
-                "interference_bumps": interference_bumps,
-            }
+            return _build_agent_result(False, None, None, "", abort_reason_override=abort_reason or "NO_WINNER_SELECTED")
 
         winner_attempts_used = 0
         winner_hotspot_bumped = False
         winner_store_key = task_key(namespace, "store:{}:detail".format(winner_store_id))
+        commit_phase_started = time.time()
         while True:
             winner_attempts_used += 1
+            winner_txn_attempts += 1
+            winner_commit_rounds += 1
             txn_attempts += 1
             start_result = _record_tool(trace, messages, "tx_start", {}, tx_start({}))
             if not start_result.get("ok"):
@@ -1025,28 +1149,12 @@ def _reference_agent_run(
                 commit_result = _record_tool(trace, messages, "tx_commit", {"tx_id": tx_id}, tx_commit({"tx_id": tx_id}))
                 if commit_result.get("ok"):
                     committed_attempts += 1
+                    commit_phase_latency_sec = time.time() - commit_phase_started
                     try:
                         final_answer, final_raw = _load_final_answer(namespace)
                     except Exception:
                         pass
-                    return {
-                        "mode": mode,
-                        "messages": messages,
-                        "tool_trace": trace,
-                        "db_retry_count": retry_count,
-                        "db_abort_count": abort_count,
-                        "abort_reasons": abort_reasons,
-                        "db_abort_reason": abort_reason,
-                        "submit_ok": True,
-                        "final_answer": final_answer,
-                        "final_answer_raw": final_raw,
-                        "selected_store_id": winner_store_id,
-                        "txn_attempts": txn_attempts,
-                        "rolled_back_attempts": rolled_back_attempts,
-                        "committed_attempts": committed_attempts,
-                        "candidate_count": len(candidate_store_ids),
-                        "interference_bumps": interference_bumps,
-                    }
+                    return _build_agent_result(True, final_answer, final_raw, winner_store_id)
 
                 abort_count += 1
                 abort_reason = commit_result.get("error", "TX_COMMIT_FAILED")
@@ -1072,54 +1180,26 @@ def _reference_agent_run(
                 continue
             break
 
-        return {
-            "mode": mode,
-            "messages": messages,
-            "tool_trace": trace,
-            "db_retry_count": retry_count,
-            "db_abort_count": abort_count,
-            "abort_reasons": abort_reasons,
-            "db_abort_reason": abort_reason,
-            "submit_ok": False,
-            "final_answer": None,
-            "final_answer_raw": None,
-            "selected_store_id": winner_store_id,
-            "txn_attempts": txn_attempts,
-            "rolled_back_attempts": rolled_back_attempts,
-            "committed_attempts": committed_attempts,
-            "candidate_count": len(candidate_store_ids),
-            "interference_bumps": interference_bumps,
-        }
+        commit_phase_latency_sec = time.time() - commit_phase_started
+        return _build_agent_result(False, None, None, winner_store_id)
 
     tree_start_result = _record_tool(trace, messages, "tree_tx_start", {}, tree_tx_start({}))
     if not tree_start_result.get("ok"):
-        return {
-            "mode": mode,
-            "messages": messages,
-            "tool_trace": trace,
-            "db_retry_count": 0,
-            "db_abort_count": 1,
-            "abort_reasons": [tree_start_result.get("error", "TREE_TX_START_FAILED")],
-            "db_abort_reason": tree_start_result.get("error", "TREE_TX_START_FAILED"),
-            "submit_ok": False,
-            "final_answer": None,
-            "final_answer_raw": None,
-            "selected_store_id": "",
-            "txn_attempts": 0,
-            "rolled_back_attempts": 0,
-            "committed_attempts": 0,
-            "candidate_count": len(candidate_store_ids),
-            "interference_bumps": 0,
-        }
+        abort_count = 1
+        abort_reason = tree_start_result.get("error", "TREE_TX_START_FAILED")
+        abort_reasons = [abort_reason]
+        return _build_agent_result(False, None, None, "", abort_reason_override=abort_reason)
 
     tx_id = tree_start_result["tx_id"]
     txn_attempts = 1
+    explore_txn_attempts = 1
     winner_branch_id = None
     branch_to_store = {}
     branch_payloads = {}
     try:
         meta_key = task_key(namespace, "meta:task")
         product_key = task_key(namespace, "product:{}:detail".format(expected_product_id))
+        explore_phase_started = time.time()
         if meta_key:
             _record_tool(
                 trace,
@@ -1184,6 +1264,7 @@ def _reference_agent_run(
                 store_detail=store_detail if isinstance(store_detail, dict) else {},
                 expected_order=expected_order,
                 expected_product_id=expected_product_id,
+                expected_product_profile=expected_product_profile,
             )
             branch_payloads[branch_id] = candidate_payload
             tree_put_many_requests.append(
@@ -1209,7 +1290,10 @@ def _reference_agent_run(
             },
         )
 
+        explore_phase_latency_sec = time.time() - explore_phase_started
+        winner_selection_started = time.time()
         winner_payload = _select_winner_payload(list(branch_payloads.values()))
+        winner_selection_latency_sec = time.time() - winner_selection_started
         winner_store_id = str(winner_payload.get("candidate_store_id", "")) if winner_payload else ""
         if winner_store_id:
             for branch_id, payload in branch_payloads.items():
@@ -1222,28 +1306,17 @@ def _reference_agent_run(
 
         if winner_branch_id is None:
             _record_tool(trace, messages, "tree_tx_abort", {"tx_id": tx_id}, tree_tx_abort({"tx_id": tx_id}))
-            return {
-                "mode": mode,
-                "messages": messages,
-                "tool_trace": trace,
-                "db_retry_count": retry_count,
-                "db_abort_count": max(1, abort_count),
-                "abort_reasons": abort_reasons or ["NO_BRANCH_CREATED"],
-                "db_abort_reason": abort_reason or "NO_BRANCH_CREATED",
-                "submit_ok": False,
-                "final_answer": None,
-                "final_answer_raw": None,
-                "selected_store_id": "",
-                "txn_attempts": txn_attempts,
-                "rolled_back_attempts": 0,
-                "committed_attempts": committed_attempts,
-                "candidate_count": len(candidate_store_ids),
-                "interference_bumps": interference_bumps,
-            }
+            abort_count = max(1, abort_count)
+            if not abort_reasons:
+                abort_reasons = ["NO_BRANCH_CREATED"]
+            return _build_agent_result(False, None, None, "", abort_reason_override=abort_reason or "NO_BRANCH_CREATED")
 
         if _schedule_hotspot_bump(contention_profile, interference_manager, hotspot_key):
             interference_bumps += 1
 
+        commit_phase_started = time.time()
+        winner_txn_attempts = 1
+        winner_commit_rounds = 1
         _record_tool(
             trace,
             messages,
@@ -1320,6 +1393,7 @@ def _reference_agent_run(
         if not commit_result.get("ok"):
             abort_count += 1
             retry_count += 1
+            winner_commit_rounds += 1
             abort_reason = commit_result.get("abort_reason", "") or commit_result.get("error", "TREE_COMMIT_FAILED")
             abort_reasons.append(abort_reason)
             if hotspot_key:
@@ -1376,30 +1450,14 @@ def _reference_agent_run(
                 committed_attempts = 1
         else:
             committed_attempts = 1
+        commit_phase_latency_sec = time.time() - commit_phase_started
 
         if committed_attempts:
             try:
                 final_answer, final_raw = _load_final_answer(namespace)
             except Exception:
                 pass
-            return {
-                "mode": mode,
-                "messages": messages,
-                "tool_trace": trace,
-                "db_retry_count": retry_count,
-                "db_abort_count": abort_count,
-                "abort_reasons": abort_reasons,
-                "db_abort_reason": abort_reason,
-                "submit_ok": True,
-                "final_answer": final_answer,
-                "final_answer_raw": final_raw,
-                "selected_store_id": winner_store_id,
-                "txn_attempts": txn_attempts,
-                "rolled_back_attempts": 0,
-                "committed_attempts": committed_attempts,
-                "candidate_count": len(candidate_store_ids),
-                "interference_bumps": interference_bumps,
-            }
+            return _build_agent_result(True, final_answer, final_raw, winner_store_id)
     except Exception as exc:
         abort_count += 1
         abort_reason = str(exc)
@@ -1408,24 +1466,7 @@ def _reference_agent_run(
         _record_tool(trace, messages, "tree_tx_abort", {"tx_id": tx_id}, tree_tx_abort({"tx_id": tx_id}))
     except Exception:
         pass
-    return {
-        "mode": mode,
-        "messages": messages,
-        "tool_trace": trace,
-        "db_retry_count": retry_count,
-        "db_abort_count": abort_count,
-        "abort_reasons": abort_reasons,
-        "db_abort_reason": abort_reason,
-        "submit_ok": False,
-        "final_answer": None,
-        "final_answer_raw": None,
-        "selected_store_id": winner_store_id,
-        "txn_attempts": txn_attempts,
-        "rolled_back_attempts": 0,
-        "committed_attempts": committed_attempts,
-        "candidate_count": len(candidate_store_ids),
-        "interference_bumps": interference_bumps,
-    }
+    return _build_agent_result(False, None, None, winner_store_id)
 
 
 def hard_evaluate_task(
@@ -1624,9 +1665,16 @@ def _aggregate_mode_metrics(records: Sequence[Dict[str, Any]], trials: int, elap
     total_txn_attempts = sum(record["agent_result"].get("txn_attempts", 0) for record in records)
     total_rollbacks = sum(record["agent_result"].get("rolled_back_attempts", 0) for record in records)
     total_candidates = sum(record["agent_result"].get("candidate_count", 0) for record in records)
+    total_branches = sum(record["agent_result"].get("branch_count", 0) for record in records)
     total_abort_count = sum(record["agent_result"].get("db_abort_count", 0) for record in records)
     total_retry_count = sum(record["agent_result"].get("db_retry_count", 0) for record in records)
     total_bumps = sum(record["agent_result"].get("interference_bumps", 0) for record in records)
+    total_explore_txn_attempts = sum(record["agent_result"].get("explore_txn_attempts", 0) for record in records)
+    total_winner_txn_attempts = sum(record["agent_result"].get("winner_txn_attempts", 0) for record in records)
+    total_winner_commit_rounds = sum(record["agent_result"].get("winner_commit_rounds", 0) for record in records)
+    winner_selection_latencies = [record["agent_result"].get("winner_selection_latency_sec", 0.0) for record in records]
+    explore_phase_latencies = [record["agent_result"].get("explore_phase_latency_sec", 0.0) for record in records]
+    commit_phase_latencies = [record["agent_result"].get("commit_phase_latency_sec", 0.0) for record in records]
 
     elapsed = max(elapsed_sec, 1e-9)
     return {
@@ -1638,10 +1686,22 @@ def _aggregate_mode_metrics(records: Sequence[Dict[str, Any]], trials: int, elap
         "p95_latency_sec": _p95(latencies),
         "throughput_tasks_per_sec": float(len(records)) / elapsed,
         "throughput_commits_per_sec": float(total_commits) / elapsed,
+        "logical_branches_per_sec": float(total_branches) / elapsed,
         "avg_txn_attempts_per_task": float(total_txn_attempts) / float(len(records)),
         "avg_rolled_back_attempts_per_task": float(total_rollbacks) / float(len(records)),
         "avg_candidate_count": float(total_candidates) / float(len(records)),
+        "avg_branch_count": float(total_branches) / float(len(records)),
+        "avg_explore_txn_attempts_per_task": float(total_explore_txn_attempts) / float(len(records)),
+        "avg_winner_txn_attempts_per_task": float(total_winner_txn_attempts) / float(len(records)),
+        "avg_winner_commit_rounds_per_task": float(total_winner_commit_rounds) / float(len(records)),
+        "avg_winner_selection_latency_sec": sum(winner_selection_latencies) / float(len(winner_selection_latencies)),
+        "avg_explore_phase_latency_sec": sum(explore_phase_latencies) / float(len(explore_phase_latencies)),
+        "avg_commit_phase_latency_sec": sum(commit_phase_latencies) / float(len(commit_phase_latencies)),
+        "p95_winner_selection_latency_sec": _p95(winner_selection_latencies),
+        "p95_explore_phase_latency_sec": _p95(explore_phase_latencies),
+        "p95_commit_phase_latency_sec": _p95(commit_phase_latencies),
         "db_abort_count": total_abort_count,
+        "db_abort_rate_per_attempt": float(total_abort_count) / float(max(total_txn_attempts, 1)),
         "db_retry_count": total_retry_count,
         "interference_bumps": total_bumps,
         "elapsed_sec": elapsed_sec,
@@ -1827,6 +1887,13 @@ def run_delivery_experiment(
         "skipped_task_count": load_summary.get("skipped_task_count", 0),
         "skip_reason_distribution": load_summary.get("skip_reason_distribution", {}),
         "source_counts": load_summary.get("source_counts", {}),
+        "comparison_contract": {
+            "same_candidate_pool": True,
+            "same_winner_selector": "deterministic_rank_on_branch_payload",
+            "same_private_branch_payload_shape": True,
+            "baseline_execution_model": "serial_normal_transactions_plus_winner_commit",
+            "tree_execution_model": "single_tree_transaction_plus_branch_private_rw",
+        },
         "elapsed_sec": finished_at - started_at,
         "mode_metrics": {},
     }

@@ -33,7 +33,7 @@ conda activate tree-db
 
 ```bash
 export OPENAI_BASE_URL="https://api.deepseek.com"
-export OPENAI_API_KEY="sk-11a6454ac5f643d6a9267bb583ccbe79"
+export OPENAI_API_KEY=""
 export OPENAI_MODEL="deepseek-v4-flash"
 export TREE_DB_HOST="127.0.0.1"
 export TREE_DB_PORT="19091"
