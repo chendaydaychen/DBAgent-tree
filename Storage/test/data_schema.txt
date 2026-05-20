@@ -1,0 +1,7 @@
+//size, type, name
+TABLE=Data_TABLE
+    128,string,KEY
+    131072,string,VALUE
+
+INDEX=Data_INDEX
+Data_TABLE,1
