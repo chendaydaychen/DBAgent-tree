@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -157,7 +158,11 @@ def _required_order(task: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _namespace_token(value: str) -> str:
-    return str(value).replace(":", "_").replace("/", "_").replace(" ", "_")
+    token = str(value).replace(":", "_").replace("/", "_").replace(" ", "_")
+    if len(token) <= 16:
+        return token
+    digest = hashlib.sha1(token.encode("utf-8")).hexdigest()[:8]
+    return "{}_{}".format(token[:6], digest)
 
 
 def build_namespace(run_id: str, mode: str, task_uid: str, trial: int) -> str:
@@ -169,7 +174,8 @@ def task_key(namespace: str, suffix: str) -> str:
 
 
 def _hotspot_key(namespace: str) -> str:
-    return task_key(namespace, "meta:contention:hotspot")
+    del namespace
+    return "global:contention:hotspot"
 
 
 def _build_branch_candidate_key(namespace: str, branch_id: int) -> str:
@@ -186,6 +192,11 @@ def _find_store_and_product_ids(task: Dict[str, Any]) -> Tuple[str, str]:
     products = order.get("products", [])
     if products:
         product_id = str(products[0].get("product_id", ""))
+    if product_id:
+        stores = task.get("environment", {}).get("stores", {}) or {}
+        available = set(_available_product_ids(stores))
+        if product_id not in available:
+            product_id = ""
     return str(order.get("store_id", "")), product_id
 
 
@@ -443,10 +454,6 @@ def project_task_to_entries(task: Dict[str, Any], namespace: str, contention_pro
             product_ids.append(product_id)
             entries[task_key(namespace, "product:{}:detail".format(product_id))] = _json_dumps(product)
     entries[task_key(namespace, "index:products")] = _json_dumps(sorted(product_ids))
-    if contention_profile == "hotspot":
-        entries[_hotspot_key(namespace)] = _json_dumps(
-            {"version": 0, "namespace": namespace, "updated_by": "projection"}
-        )
     return entries
 
 
@@ -467,12 +474,11 @@ def project_task(
     contention_profile: str = "none",
 ) -> Dict[str, Any]:
     entries = project_task_to_entries(task, namespace, contention_profile=contention_profile)
+    write_requests = [(key, value) for key, value in entries.items() if value != ""]
     tx_id = agent.start()
     try:
-        for key, value in entries.items():
-            if value == "":
-                continue
-            agent.put(tx_id, key, value)
+        if write_requests:
+            agent.put_many(tx_id, write_requests)
         agent.commit(tx_id)
     except Exception:
         agent.rollback(tx_id)
@@ -779,6 +785,53 @@ def _select_winner_payload(candidate_payloads: Sequence[Dict[str, Any]]) -> Dict
     return sorted(candidate_payloads, key=_candidate_rank_key)[0]
 
 
+def _semantic_recheck_winner_payload(
+    store_id: str,
+    attempt: int,
+    store_raw: Any,
+    expected_order: Dict[str, Any],
+    expected_product_id: str,
+    expected_product_profile: Optional[Dict[str, Any]] = None,
+    product_raw: Any = None,
+) -> Tuple[bool, str, Dict[str, Any]]:
+    store_detail = _parse_json_safely(store_raw, {})
+    if not isinstance(store_detail, dict) or not store_detail:
+        return False, "WINNER_STORE_DETAIL_UNAVAILABLE", {}
+
+    refreshed_payload = _candidate_summary_payload(
+        store_id=store_id,
+        attempt=attempt,
+        store_detail=store_detail,
+        expected_order=expected_order,
+        expected_product_id=expected_product_id,
+        expected_product_profile=expected_product_profile,
+    )
+
+    if expected_product_id:
+        if not refreshed_payload.get("has_expected_product"):
+            return False, "WINNER_EXPECTED_PRODUCT_MISSING", refreshed_payload
+        if str(refreshed_payload.get("matched_product_id", "")) != expected_product_id:
+            return False, "WINNER_MATCHED_PRODUCT_CHANGED", refreshed_payload
+
+    matched_price = refreshed_payload.get("matched_product_price")
+    if product_raw not in (None, ""):
+        product_detail = _parse_json_safely(product_raw, {})
+        if not isinstance(product_detail, dict) or not product_detail:
+            return False, "WINNER_PRODUCT_DETAIL_UNAVAILABLE", refreshed_payload
+        product_id = str(product_detail.get("product_id", ""))
+        if expected_product_id and product_id and product_id != expected_product_id:
+            return False, "WINNER_PRODUCT_DETAIL_ID_CHANGED", refreshed_payload
+        detail_price = product_detail.get("price")
+        if detail_price is not None and matched_price is not None:
+            try:
+                if abs(float(detail_price) - float(matched_price)) > 1e-6:
+                    return False, "WINNER_PRODUCT_DETAIL_PRICE_MISMATCH", refreshed_payload
+            except Exception:
+                return False, "WINNER_PRODUCT_DETAIL_PRICE_INVALID", refreshed_payload
+
+    return True, "", refreshed_payload
+
+
 def _should_retry_baseline_winner(
     attempts_used: int,
     retry_policy: str,
@@ -793,8 +846,8 @@ def _should_retry_baseline_winner(
 def _baseline_retry_backoff_sec(attempts_used: int, retry_policy: str) -> float:
     if retry_policy != "until_success":
         return 0.0
-    exponent = min(max(0, attempts_used - 1), 8)
-    base_backoff = min(0.001 * (2 ** exponent), 0.02)
+    exponent = min(max(0, attempts_used - 1), 6)
+    base_backoff = min(0.005 * (2 ** exponent), 0.2)
     return base_backoff * random.uniform(0.5, 1.5)
 
 
@@ -928,8 +981,13 @@ def _schedule_hotspot_bump(
     contention_profile: str,
     interference_manager: Optional[HotspotInterferenceManager],
     hotspot_key: str,
+    hotspot_probability: float = 1.0,
 ) -> bool:
     if contention_profile != "hotspot" or interference_manager is None or not hotspot_key:
+        return False
+    if hotspot_probability <= 0.0:
+        return False
+    if hotspot_probability < 1.0 and random.random() > hotspot_probability:
         return False
     done_event = interference_manager.schedule(hotspot_key)
     done_event.wait(timeout=2.0)
@@ -968,6 +1026,7 @@ def _reference_agent_run(
     top_k: int,
     contention_profile: str = "none",
     interference_manager: Optional[HotspotInterferenceManager] = None,
+    hotspot_probability: float = 1.0,
     baseline_winner_retry_policy: str = "fixed",
     baseline_winner_max_attempts: int = 2,
 ) -> Dict[str, Any]:
@@ -981,8 +1040,10 @@ def _reference_agent_run(
     expected_store_id, expected_product_id = _find_store_and_product_ids(task)
     abort_reason = ""
     abort_reasons = []
+    semantic_recheck_reasons = []
     retry_count = 0
     abort_count = 0
+    semantic_recheck_fail_count = 0
     committed_attempts = 0
     rolled_back_attempts = 0
     txn_attempts = 0
@@ -1013,6 +1074,8 @@ def _reference_agent_run(
             "db_abort_count": abort_count,
             "db_abort_rate_per_attempt": float(abort_count) / float(max(txn_attempts, 1)),
             "abort_reasons": abort_reasons,
+            "semantic_recheck_fail_count": semantic_recheck_fail_count,
+            "semantic_recheck_reasons": semantic_recheck_reasons,
             "db_abort_reason": abort_reason_override if abort_reason_override is not None else abort_reason,
             "submit_ok": submit_ok,
             "final_answer": final_answer,
@@ -1131,18 +1194,39 @@ def _reference_agent_run(
             tx_id = start_result["tx_id"]
             try:
                 _record_baseline_tx_get(trace, messages, tx_id, meta_key)
-                _record_baseline_tx_get(trace, messages, tx_id, winner_store_key)
+                winner_store_result = _record_baseline_tx_get(trace, messages, tx_id, winner_store_key)
+                winner_product_result = None
                 if expected_product_id:
-                    _record_baseline_tx_get(trace, messages, tx_id, product_key)
+                    winner_product_result = _record_baseline_tx_get(trace, messages, tx_id, product_key)
                 if hotspot_key:
                     _record_baseline_tx_get(trace, messages, tx_id, hotspot_key)
 
                 if not winner_hotspot_bumped:
-                    if _schedule_hotspot_bump(contention_profile, interference_manager, hotspot_key):
+                    if _schedule_hotspot_bump(
+                        contention_profile,
+                        interference_manager,
+                        hotspot_key,
+                        hotspot_probability=hotspot_probability,
+                    ):
                         interference_bumps += 1
                     winner_hotspot_bumped = True
                 if hotspot_key:
                     _record_baseline_tx_get(trace, messages, tx_id, hotspot_key)
+
+                constraints_ok, constraint_reason, _refreshed_payload = _semantic_recheck_winner_payload(
+                    store_id=winner_store_id,
+                    attempt=winner_attempts_used,
+                    store_raw=winner_store_result.get("value"),
+                    expected_order=expected_order,
+                    expected_product_id=expected_product_id,
+                    expected_product_profile=expected_product_profile,
+                    product_raw=winner_product_result.get("value") if winner_product_result else None,
+                )
+                if not constraints_ok:
+                    semantic_recheck_fail_count += 1
+                    abort_reason = constraint_reason
+                    semantic_recheck_reasons.append(abort_reason)
+                    break
 
                 final_answer, final_raw = _order_array_from_submit_args(expected_order)
                 _record_baseline_tx_put(trace, messages, tx_id, task_key(namespace, "answer:final"), final_raw)
@@ -1311,7 +1395,12 @@ def _reference_agent_run(
                 abort_reasons = ["NO_BRANCH_CREATED"]
             return _build_agent_result(False, None, None, "", abort_reason_override=abort_reason or "NO_BRANCH_CREATED")
 
-        if _schedule_hotspot_bump(contention_profile, interference_manager, hotspot_key):
+        if _schedule_hotspot_bump(
+            contention_profile,
+            interference_manager,
+            hotspot_key,
+            hotspot_probability=hotspot_probability,
+        ):
             interference_bumps += 1
 
         commit_phase_started = time.time()
@@ -1324,6 +1413,8 @@ def _reference_agent_run(
             {"tx_id": tx_id, "branch_id": winner_branch_id},
             tree_tx_winner({"tx_id": tx_id, "branch_id": winner_branch_id}),
         )
+        winner_store_refresh = None
+        winner_product_refresh = None
         if hotspot_key:
             _record_tool(
                 trace,
@@ -1332,7 +1423,7 @@ def _reference_agent_run(
                 {"tx_id": tx_id, "branch_id": winner_branch_id, "key": hotspot_key},
                 tree_tx_refresh_winner({"tx_id": tx_id, "branch_id": winner_branch_id, "key": hotspot_key}),
             )
-        _record_tool(
+        winner_store_refresh = _record_tool(
             trace,
             messages,
             "tree_tx_refresh_winner",
@@ -1350,7 +1441,7 @@ def _reference_agent_run(
             ),
         )
         if expected_product_id:
-            _record_tool(
+            winner_product_refresh = _record_tool(
                 trace,
                 messages,
                 "tree_tx_refresh_winner",
@@ -1367,6 +1458,23 @@ def _reference_agent_run(
                     }
                 ),
             )
+
+        constraints_ok, constraint_reason, _refreshed_payload = _semantic_recheck_winner_payload(
+            store_id=winner_store_id,
+            attempt=winner_branch_id,
+            store_raw=winner_store_refresh.get("value") if winner_store_refresh else None,
+            expected_order=expected_order,
+            expected_product_id=expected_product_id,
+            expected_product_profile=expected_product_profile,
+            product_raw=winner_product_refresh.get("value") if winner_product_refresh else None,
+        )
+        if not constraints_ok:
+            semantic_recheck_fail_count += 1
+            abort_reason = constraint_reason
+            semantic_recheck_reasons.append(abort_reason)
+            _record_tool(trace, messages, "tree_tx_abort", {"tx_id": tx_id}, tree_tx_abort({"tx_id": tx_id}))
+            commit_phase_latency_sec = time.time() - commit_phase_started
+            return _build_agent_result(False, None, None, winner_store_id)
 
         final_answer, final_raw = _order_array_from_submit_args(expected_order)
         _record_tool(
@@ -1404,7 +1512,7 @@ def _reference_agent_run(
                     {"tx_id": tx_id, "branch_id": winner_branch_id, "key": hotspot_key},
                     tree_tx_refresh_winner({"tx_id": tx_id, "branch_id": winner_branch_id, "key": hotspot_key}),
                 )
-            _record_tool(
+            winner_store_refresh = _record_tool(
                 trace,
                 messages,
                 "tree_tx_refresh_winner",
@@ -1421,6 +1529,40 @@ def _reference_agent_run(
                     }
                 ),
             )
+            if expected_product_id:
+                winner_product_refresh = _record_tool(
+                    trace,
+                    messages,
+                    "tree_tx_refresh_winner",
+                    {
+                        "tx_id": tx_id,
+                        "branch_id": winner_branch_id,
+                        "key": task_key(namespace, "product:{}:detail".format(expected_product_id)),
+                    },
+                    tree_tx_refresh_winner(
+                        {
+                            "tx_id": tx_id,
+                            "branch_id": winner_branch_id,
+                            "key": task_key(namespace, "product:{}:detail".format(expected_product_id)),
+                        }
+                    ),
+                )
+            constraints_ok, constraint_reason, _refreshed_payload = _semantic_recheck_winner_payload(
+                store_id=winner_store_id,
+                attempt=winner_branch_id,
+                store_raw=winner_store_refresh.get("value") if winner_store_refresh else None,
+                expected_order=expected_order,
+                expected_product_id=expected_product_id,
+                expected_product_profile=expected_product_profile,
+                product_raw=winner_product_refresh.get("value") if winner_product_refresh else None,
+            )
+            if not constraints_ok:
+                semantic_recheck_fail_count += 1
+                abort_reason = constraint_reason
+                semantic_recheck_reasons.append(abort_reason)
+                _record_tool(trace, messages, "tree_tx_abort", {"tx_id": tx_id}, tree_tx_abort({"tx_id": tx_id}))
+                commit_phase_latency_sec = time.time() - commit_phase_started
+                return _build_agent_result(False, None, None, winner_store_id)
             _record_tool(
                 trace,
                 messages,
@@ -1625,11 +1767,15 @@ def _aggregate_mode_metrics(records: Sequence[Dict[str, Any]], trials: int, elap
     success_count = sum(1 for record in records if record["evaluation"]["success"])
     latencies = [record["latency_sec"] for record in records]
     abort_reasons = defaultdict(int)
+    semantic_recheck_reasons = defaultdict(int)
     failure_taxonomy = defaultdict(int)
     for record in records:
         for reason in record["agent_result"].get("abort_reasons", []):
             if reason:
                 abort_reasons[reason] += 1
+        for reason in record["agent_result"].get("semantic_recheck_reasons", []):
+            if reason:
+                semantic_recheck_reasons[reason] += 1
         failure = record["evaluation"].get("failure_type", "")
         if failure:
             failure_taxonomy[failure] += 1
@@ -1667,6 +1813,7 @@ def _aggregate_mode_metrics(records: Sequence[Dict[str, Any]], trials: int, elap
     total_candidates = sum(record["agent_result"].get("candidate_count", 0) for record in records)
     total_branches = sum(record["agent_result"].get("branch_count", 0) for record in records)
     total_abort_count = sum(record["agent_result"].get("db_abort_count", 0) for record in records)
+    total_semantic_recheck_fail_count = sum(record["agent_result"].get("semantic_recheck_fail_count", 0) for record in records)
     total_retry_count = sum(record["agent_result"].get("db_retry_count", 0) for record in records)
     total_bumps = sum(record["agent_result"].get("interference_bumps", 0) for record in records)
     total_explore_txn_attempts = sum(record["agent_result"].get("explore_txn_attempts", 0) for record in records)
@@ -1702,10 +1849,13 @@ def _aggregate_mode_metrics(records: Sequence[Dict[str, Any]], trials: int, elap
         "p95_commit_phase_latency_sec": _p95(commit_phase_latencies),
         "db_abort_count": total_abort_count,
         "db_abort_rate_per_attempt": float(total_abort_count) / float(max(total_txn_attempts, 1)),
+        "semantic_recheck_fail_count": total_semantic_recheck_fail_count,
+        "semantic_recheck_fail_rate_per_task": float(total_semantic_recheck_fail_count) / float(len(records)),
         "db_retry_count": total_retry_count,
         "interference_bumps": total_bumps,
         "elapsed_sec": elapsed_sec,
         "abort_reason_distribution": dict(abort_reasons),
+        "semantic_recheck_reason_distribution": dict(semantic_recheck_reasons),
         "failure_taxonomy": dict(failure_taxonomy),
         "pass_hat_k": pass_hat_ks,
         "pass_at_k": pass_at_ks,
@@ -1723,6 +1873,7 @@ def _run_single_task(
     max_rounds: int,
     contention_profile: str,
     interference_manager: Optional[HotspotInterferenceManager],
+    hotspot_probability: float,
     baseline_winner_retry_policy: str,
     baseline_winner_max_attempts: int,
 ) -> Dict[str, Any]:
@@ -1748,6 +1899,7 @@ def _run_single_task(
             top_k=top_k,
             contention_profile=contention_profile,
             interference_manager=interference_manager,
+            hotspot_probability=hotspot_probability,
             baseline_winner_retry_policy=baseline_winner_retry_policy,
             baseline_winner_max_attempts=baseline_winner_max_attempts,
         )
@@ -1797,8 +1949,10 @@ def run_delivery_experiment(
     contention_profile: str,
     parallelism: int,
     interference_workers: int,
+    hotspot_probability: float,
     baseline_winner_retry_policy: str,
     baseline_winner_max_attempts: int,
+    progress_callback: Optional[Any] = None,
 ) -> Dict[str, Any]:
     _makedirs(output_dir)
     tasks, load_summary = load_experiment_tasks(
@@ -1835,10 +1989,13 @@ def run_delivery_experiment(
                                 max_rounds=max_rounds,
                                 contention_profile=contention_profile,
                                 interference_manager=interference_manager,
+                                hotspot_probability=hotspot_probability,
                                 baseline_winner_retry_policy=baseline_winner_retry_policy,
                                 baseline_winner_max_attempts=baseline_winner_max_attempts,
                             )
                         )
+                        if progress_callback is not None:
+                            progress_callback(mode, trial_idx, len(mode_records), len(tasks))
                 else:
                     with ThreadPoolExecutor(max_workers=parallelism) as executor:
                         futures = []
@@ -1855,12 +2012,15 @@ def run_delivery_experiment(
                                     max_rounds,
                                     contention_profile,
                                     interference_manager,
+                                    hotspot_probability,
                                     baseline_winner_retry_policy,
                                     baseline_winner_max_attempts,
                                 )
                             )
                         for future in as_completed(futures):
                             mode_records.append(future.result())
+                            if progress_callback is not None:
+                                progress_callback(mode, trial_idx, len(mode_records), len(tasks))
             mode_elapsed[mode] = time.time() - mode_started
             all_records.extend(mode_records)
     finally:
@@ -1881,6 +2041,7 @@ def run_delivery_experiment(
         "contention_profile": contention_profile,
         "parallelism": parallelism,
         "interference_workers": interference_workers,
+        "hotspot_probability": hotspot_probability,
         "baseline_winner_retry_policy": baseline_winner_retry_policy,
         "baseline_winner_max_attempts": baseline_winner_max_attempts,
         "eligible_task_count": load_summary.get("eligible_task_count", len(tasks)),
@@ -1957,6 +2118,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         choices=["none", "hotspot"],
         help="Whether to project and perturb a hotspot key during execution",
     )
+    parser.add_argument(
+        "--hotspot-probability",
+        type=float,
+        default=1.0,
+        help="Probability of injecting a hotspot bump on each eligible task when contention-profile=hotspot",
+    )
     parser.add_argument("--parallelism", type=int, default=1, help="Number of concurrent task instances per mode/trial")
     parser.add_argument("--interference-workers", type=int, default=0, help="Number of background hotspot interference workers")
     parser.add_argument(
@@ -2003,6 +2170,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         contention_profile=args.contention_profile,
         parallelism=max(1, args.parallelism),
         interference_workers=max(0, args.interference_workers),
+        hotspot_probability=max(0.0, min(1.0, args.hotspot_probability)),
         baseline_winner_retry_policy=args.baseline_winner_retry_policy,
         baseline_winner_max_attempts=max(1, args.baseline_winner_max_attempts),
     )

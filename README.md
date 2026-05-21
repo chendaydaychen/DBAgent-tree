@@ -29,7 +29,7 @@ conda activate tree-db
 
 ### 3. 模型环境变量
 
-通过 `vLLM` 提供 OpenAI-compatible API，配置如下：
+配置如下：
 
 ```bash
 export OPENAI_BASE_URL="https://api.deepseek.com"

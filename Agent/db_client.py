@@ -376,6 +376,20 @@ class AgentDBClient:
         if not self._is_ok(resp):
             raise RuntimeError("PUT failed: {}".format(resp))
 
+    def put_many(self, tx_id: str, requests) -> None:
+        if self._using_mini():
+            for key, value in requests:
+                self._mini.put(tx_id, key, value)
+            return
+        session = self._require_session(tx_id)
+        flat_parts = ["PUTMANY", str(len(requests))]
+        for key, value in requests:
+            flat_parts.append(key)
+            flat_parts.append(self._hex_encode(value))
+        resp = session.request(" ".join(flat_parts))
+        if not self._is_ok(resp):
+            raise RuntimeError("PUTMANY failed: {}".format(resp))
+
     def commit(self, tx_id: str) -> None:
         if self._using_mini():
             self._mini.commit(tx_id)

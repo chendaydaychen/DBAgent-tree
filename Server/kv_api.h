@@ -33,6 +33,7 @@ namespace server
     Rc begin_tree_txn(TxnHandle &h);
     Rc get(TxnHandle &h, const std::string &key, std::string &value_out);
     Rc put(TxnHandle &h, const std::string &key, const std::string &value);
+    Rc put_many(TxnHandle &h, const std::vector<std::pair<std::string, std::string>> &requests);
     Rc tree_create_branch(TxnHandle &h, uint32_t parent_branch_id, uint32_t &branch_id_out);
     Rc tree_create_branches(TxnHandle &h, uint32_t parent_branch_id, uint32_t count, std::vector<uint32_t> &branch_ids_out);
     Rc tree_get(TxnHandle &h, uint32_t branch_id, const std::string &key, std::string &value_out);

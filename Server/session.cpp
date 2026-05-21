@@ -174,6 +174,47 @@ namespace server
                 if (rc == Rc::OK) send_all(client_fd, "OK\n");
                 else if (rc == Rc::ABORT) { in_txn = false; send_all(client_fd, "ERR ABORT\n"); }
                 else send_all(client_fd, "ERR PUT_FAIL\n");
+            } else if (cmd == "PUTMANY") {
+                if (!in_txn) {
+                    send_all(client_fd, "ERR NO_ACTIVE_TXN\n");
+                    continue;
+                }
+                if (tree_mode) {
+                    send_all(client_fd, "ERR TREE_TXN_USE_TPUTMANY\n");
+                    continue;
+                }
+                if (parts.size() < 3) {
+                    send_all(client_fd, "ERR USAGE PUTMANY <count> (<key> <hex_value>)...\n");
+                    continue;
+                }
+                uint32_t count = 0;
+                if (!parse_u32(parts[1], count)) {
+                    send_all(client_fd, "ERR BAD_COUNT\n");
+                    continue;
+                }
+                if (parts.size() != static_cast<size_t>(2 + count * 2)) {
+                    send_all(client_fd, "ERR BAD_PUTMANY_ARITY\n");
+                    continue;
+                }
+                std::vector<std::pair<std::string, std::string>> requests;
+                requests.reserve(count);
+                bool bad_args = false;
+                for (uint32_t idx = 0; idx < count; idx++) {
+                    std::string decoded_value;
+                    if (!hex_decode(parts[3 + idx * 2], decoded_value)) {
+                        bad_args = true;
+                        break;
+                    }
+                    requests.emplace_back(parts[2 + idx * 2], decoded_value);
+                }
+                if (bad_args) {
+                    send_all(client_fd, "ERR BAD_PUTMANY_ARGS\n");
+                    continue;
+                }
+                auto rc = put_many(tx, requests);
+                if (rc == Rc::OK) send_all(client_fd, "OK\n");
+                else if (rc == Rc::ABORT) { in_txn = false; send_all(client_fd, "ERR ABORT\n"); }
+                else send_all(client_fd, "ERR PUTMANY_FAIL\n");
             } else if (cmd == "COMMIT") {
                 if (!in_txn) {
                     send_all(client_fd, "ERR NO_ACTIVE_TXN\n");

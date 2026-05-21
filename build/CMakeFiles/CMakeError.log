@@ -1,25 +1,25 @@
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
-Change Dir: /home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-YjfP1u
+Change Dir: /home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-ijUg8m
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_b1e55/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_b1e55.dir/build.make CMakeFiles/cmTC_b1e55.dir/build
-gmake[1]: Entering directory `/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-YjfP1u'
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_bc83b/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bc83b.dir/build.make CMakeFiles/cmTC_bc83b.dir/build
+gmake[1]: Entering directory `/home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-ijUg8m'
 /bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
-Building C object CMakeFiles/cmTC_b1e55.dir/src.c.o
-/usr/bin/gcc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_b1e55.dir/src.c.o -c /home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-YjfP1u/src.c
+Building C object CMakeFiles/cmTC_bc83b.dir/src.c.o
+/usr/bin/gcc-11 -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_bc83b.dir/src.c.o -c /home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-ijUg8m/src.c
 /bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
-Linking C executable cmTC_b1e55
-/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b1e55.dir/link.txt --verbose=1
-/usr/bin/gcc CMakeFiles/cmTC_b1e55.dir/src.c.o -o cmTC_b1e55 
-CMakeFiles/cmTC_b1e55.dir/src.c.o: In function `main':
+Linking C executable cmTC_bc83b
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bc83b.dir/link.txt --verbose=1
+/usr/bin/gcc-11 CMakeFiles/cmTC_bc83b.dir/src.c.o -o cmTC_bc83b 
+CMakeFiles/cmTC_bc83b.dir/src.c.o: In function `main':
 src.c:(.text+0x2d): undefined reference to `pthread_create'
 src.c:(.text+0x39): undefined reference to `pthread_detach'
 src.c:(.text+0x45): undefined reference to `pthread_cancel'
 src.c:(.text+0x56): undefined reference to `pthread_join'
 src.c:(.text+0x6a): undefined reference to `pthread_atfork'
 collect2: error: ld returned 1 exit status
-gmake[1]: *** [cmTC_b1e55] Error 1
-gmake[1]: Leaving directory `/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-YjfP1u'
-gmake: *** [cmTC_b1e55/fast] Error 2
+gmake[1]: *** [cmTC_bc83b] Error 1
+gmake[1]: Leaving directory `/home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-ijUg8m'
+gmake: *** [cmTC_bc83b/fast] Error 2
 
 
 Source file was:
@@ -45,22 +45,22 @@ int main(void)
 
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-2mBaOE
+Change Dir: /home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-aTLU8j
 
-Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_e6a84/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e6a84.dir/build.make CMakeFiles/cmTC_e6a84.dir/build
-gmake[1]: Entering directory `/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-2mBaOE'
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_d2f01/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_d2f01.dir/build.make CMakeFiles/cmTC_d2f01.dir/build
+gmake[1]: Entering directory `/home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-aTLU8j'
 /bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
-Building C object CMakeFiles/cmTC_e6a84.dir/CheckFunctionExists.c.o
-/usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_e6a84.dir/CheckFunctionExists.c.o -c /home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-2mBaOE/CheckFunctionExists.c
+Building C object CMakeFiles/cmTC_d2f01.dir/CheckFunctionExists.c.o
+/usr/bin/gcc-11   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_d2f01.dir/CheckFunctionExists.c.o -c /home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-aTLU8j/CheckFunctionExists.c
 /bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
-Linking C executable cmTC_e6a84
-/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e6a84.dir/link.txt --verbose=1
-/usr/bin/gcc  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_e6a84.dir/CheckFunctionExists.c.o -o cmTC_e6a84  -lpthreads 
+Linking C executable cmTC_d2f01
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d2f01.dir/link.txt --verbose=1
+/usr/bin/gcc-11  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_d2f01.dir/CheckFunctionExists.c.o -o cmTC_d2f01  -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-gmake[1]: *** [cmTC_e6a84] Error 1
-gmake[1]: Leaving directory `/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/CMakeScratch/TryCompile-2mBaOE'
-gmake: *** [cmTC_e6a84/fast] Error 2
+gmake[1]: *** [cmTC_d2f01] Error 1
+gmake[1]: Leaving directory `/home/cht/Tree-DB/build/CMakeFiles/CMakeScratch/TryCompile-aTLU8j'
+gmake: *** [cmTC_d2f01/fast] Error 2
 
 
 

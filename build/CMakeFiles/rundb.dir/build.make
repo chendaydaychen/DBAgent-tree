@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /home/cht/Tree-DB
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/cht/Tree-DB/build-tree-db-g11
+CMAKE_BINARY_DIR = /home/cht/Tree-DB/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/rundb.dir/depend.make
@@ -72,7 +72,7 @@ include CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Server/kv_api.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Server/kv_api.cpp.o: /home/cht/Tree-DB/Server/kv_api.cpp
 CMakeFiles/rundb.dir/Server/kv_api.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/rundb.dir/Server/kv_api.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/rundb.dir/Server/kv_api.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Server/kv_api.cpp.o -MF CMakeFiles/rundb.dir/Server/kv_api.cpp.o.d -o CMakeFiles/rundb.dir/Server/kv_api.cpp.o -c /home/cht/Tree-DB/Server/kv_api.cpp
 
 CMakeFiles/rundb.dir/Server/kv_api.cpp.i: cmake_force
@@ -86,7 +86,7 @@ CMakeFiles/rundb.dir/Server/kv_api.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Server/server.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Server/server.cpp.o: /home/cht/Tree-DB/Server/server.cpp
 CMakeFiles/rundb.dir/Server/server.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/rundb.dir/Server/server.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/rundb.dir/Server/server.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Server/server.cpp.o -MF CMakeFiles/rundb.dir/Server/server.cpp.o.d -o CMakeFiles/rundb.dir/Server/server.cpp.o -c /home/cht/Tree-DB/Server/server.cpp
 
 CMakeFiles/rundb.dir/Server/server.cpp.i: cmake_force
@@ -100,7 +100,7 @@ CMakeFiles/rundb.dir/Server/server.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Server/session.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Server/session.cpp.o: /home/cht/Tree-DB/Server/session.cpp
 CMakeFiles/rundb.dir/Server/session.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/rundb.dir/Server/session.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/rundb.dir/Server/session.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Server/session.cpp.o -MF CMakeFiles/rundb.dir/Server/session.cpp.o.d -o CMakeFiles/rundb.dir/Server/session.cpp.o -c /home/cht/Tree-DB/Server/session.cpp
 
 CMakeFiles/rundb.dir/Server/session.cpp.i: cmake_force
@@ -114,7 +114,7 @@ CMakeFiles/rundb.dir/Server/session.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o: /home/cht/Tree-DB/Storage/DataFormat/catalog.cpp
 CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o -MF CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o.d -o CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.o -c /home/cht/Tree-DB/Storage/DataFormat/catalog.cpp
 
 CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.i: cmake_force
@@ -128,7 +128,7 @@ CMakeFiles/rundb.dir/Storage/DataFormat/catalog.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o: /home/cht/Tree-DB/Storage/DataFormat/index_hash.cpp
 CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o -MF CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o.d -o CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.o -c /home/cht/Tree-DB/Storage/DataFormat/index_hash.cpp
 
 CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.i: cmake_force
@@ -142,7 +142,7 @@ CMakeFiles/rundb.dir/Storage/DataFormat/index_hash.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o: /home/cht/Tree-DB/Storage/DataFormat/row.cpp
 CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o -MF CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o.d -o CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.o -c /home/cht/Tree-DB/Storage/DataFormat/row.cpp
 
 CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.i: cmake_force
@@ -156,7 +156,7 @@ CMakeFiles/rundb.dir/Storage/DataFormat/row.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o: /home/cht/Tree-DB/Storage/DataFormat/table.cpp
 CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o -MF CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o.d -o CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.o -c /home/cht/Tree-DB/Storage/DataFormat/table.cpp
 
 CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.i: cmake_force
@@ -170,7 +170,7 @@ CMakeFiles/rundb.dir/Storage/DataFormat/table.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/config.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/config.cpp.o: /home/cht/Tree-DB/Storage/System/config.cpp
 CMakeFiles/rundb.dir/Storage/System/config.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/rundb.dir/Storage/System/config.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/rundb.dir/Storage/System/config.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/config.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/config.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/config.cpp.o -c /home/cht/Tree-DB/Storage/System/config.cpp
 
 CMakeFiles/rundb.dir/Storage/System/config.cpp.i: cmake_force
@@ -184,7 +184,7 @@ CMakeFiles/rundb.dir/Storage/System/config.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/global.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/global.cpp.o: /home/cht/Tree-DB/Storage/System/global.cpp
 CMakeFiles/rundb.dir/Storage/System/global.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/rundb.dir/Storage/System/global.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/rundb.dir/Storage/System/global.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/global.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/global.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/global.cpp.o -c /home/cht/Tree-DB/Storage/System/global.cpp
 
 CMakeFiles/rundb.dir/Storage/System/global.cpp.i: cmake_force
@@ -198,7 +198,7 @@ CMakeFiles/rundb.dir/Storage/System/global.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/helper.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/helper.cpp.o: /home/cht/Tree-DB/Storage/System/helper.cpp
 CMakeFiles/rundb.dir/Storage/System/helper.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/rundb.dir/Storage/System/helper.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/rundb.dir/Storage/System/helper.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/helper.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/helper.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/helper.cpp.o -c /home/cht/Tree-DB/Storage/System/helper.cpp
 
 CMakeFiles/rundb.dir/Storage/System/helper.cpp.i: cmake_force
@@ -212,7 +212,7 @@ CMakeFiles/rundb.dir/Storage/System/helper.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/manager.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/manager.cpp.o: /home/cht/Tree-DB/Storage/System/manager.cpp
 CMakeFiles/rundb.dir/Storage/System/manager.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/rundb.dir/Storage/System/manager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/rundb.dir/Storage/System/manager.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/manager.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/manager.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/manager.cpp.o -c /home/cht/Tree-DB/Storage/System/manager.cpp
 
 CMakeFiles/rundb.dir/Storage/System/manager.cpp.i: cmake_force
@@ -226,7 +226,7 @@ CMakeFiles/rundb.dir/Storage/System/manager.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o: /home/cht/Tree-DB/Storage/System/mem_alloc.cpp
 CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.o -c /home/cht/Tree-DB/Storage/System/mem_alloc.cpp
 
 CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.i: cmake_force
@@ -240,7 +240,7 @@ CMakeFiles/rundb.dir/Storage/System/mem_alloc.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/stats.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/stats.cpp.o: /home/cht/Tree-DB/Storage/System/stats.cpp
 CMakeFiles/rundb.dir/Storage/System/stats.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/rundb.dir/Storage/System/stats.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/rundb.dir/Storage/System/stats.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/stats.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/stats.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/stats.cpp.o -c /home/cht/Tree-DB/Storage/System/stats.cpp
 
 CMakeFiles/rundb.dir/Storage/System/stats.cpp.i: cmake_force
@@ -254,7 +254,7 @@ CMakeFiles/rundb.dir/Storage/System/stats.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/thread.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/thread.cpp.o: /home/cht/Tree-DB/Storage/System/thread.cpp
 CMakeFiles/rundb.dir/Storage/System/thread.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/rundb.dir/Storage/System/thread.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/rundb.dir/Storage/System/thread.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/thread.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/thread.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/thread.cpp.o -c /home/cht/Tree-DB/Storage/System/thread.cpp
 
 CMakeFiles/rundb.dir/Storage/System/thread.cpp.i: cmake_force
@@ -268,7 +268,7 @@ CMakeFiles/rundb.dir/Storage/System/thread.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o: /home/cht/Tree-DB/Storage/System/tree_txn.cpp
 CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.o -c /home/cht/Tree-DB/Storage/System/tree_txn.cpp
 
 CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.i: cmake_force
@@ -282,7 +282,7 @@ CMakeFiles/rundb.dir/Storage/System/tree_txn.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/System/txn.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/System/txn.cpp.o: /home/cht/Tree-DB/Storage/System/txn.cpp
 CMakeFiles/rundb.dir/Storage/System/txn.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/rundb.dir/Storage/System/txn.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/rundb.dir/Storage/System/txn.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/System/txn.cpp.o -MF CMakeFiles/rundb.dir/Storage/System/txn.cpp.o.d -o CMakeFiles/rundb.dir/Storage/System/txn.cpp.o -c /home/cht/Tree-DB/Storage/System/txn.cpp
 
 CMakeFiles/rundb.dir/Storage/System/txn.cpp.i: cmake_force
@@ -296,7 +296,7 @@ CMakeFiles/rundb.dir/Storage/System/txn.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o: /home/cht/Tree-DB/Storage/concurrency_control/occ.cpp
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o -MF CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o.d -o CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.o -c /home/cht/Tree-DB/Storage/concurrency_control/occ.cpp
 
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.i: cmake_force
@@ -310,7 +310,7 @@ CMakeFiles/rundb.dir/Storage/concurrency_control/occ.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o: /home/cht/Tree-DB/Storage/concurrency_control/occ_row.cpp
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o -MF CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o.d -o CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.o -c /home/cht/Tree-DB/Storage/concurrency_control/occ_row.cpp
 
 CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.i: cmake_force
@@ -324,7 +324,7 @@ CMakeFiles/rundb.dir/Storage/concurrency_control/occ_row.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o: /home/cht/Tree-DB/Storage/test/test_txn.cpp
 CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o -MF CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o.d -o CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.o -c /home/cht/Tree-DB/Storage/test/test_txn.cpp
 
 CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.i: cmake_force
@@ -338,7 +338,7 @@ CMakeFiles/rundb.dir/Storage/test/test_txn.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o: /home/cht/Tree-DB/Storage/test/test_wl.cpp
 CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o -MF CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o.d -o CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.o -c /home/cht/Tree-DB/Storage/test/test_wl.cpp
 
 CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.i: cmake_force
@@ -352,7 +352,7 @@ CMakeFiles/rundb.dir/Storage/test/test_wl.cpp.s: cmake_force
 CMakeFiles/rundb.dir/Storage/test/wl.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/Storage/test/wl.cpp.o: /home/cht/Tree-DB/Storage/test/wl.cpp
 CMakeFiles/rundb.dir/Storage/test/wl.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/rundb.dir/Storage/test/wl.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/rundb.dir/Storage/test/wl.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/Storage/test/wl.cpp.o -MF CMakeFiles/rundb.dir/Storage/test/wl.cpp.o.d -o CMakeFiles/rundb.dir/Storage/test/wl.cpp.o -c /home/cht/Tree-DB/Storage/test/wl.cpp
 
 CMakeFiles/rundb.dir/Storage/test/wl.cpp.i: cmake_force
@@ -366,7 +366,7 @@ CMakeFiles/rundb.dir/Storage/test/wl.cpp.s: cmake_force
 CMakeFiles/rundb.dir/main.cpp.o: CMakeFiles/rundb.dir/flags.make
 CMakeFiles/rundb.dir/main.cpp.o: /home/cht/Tree-DB/main.cpp
 CMakeFiles/rundb.dir/main.cpp.o: CMakeFiles/rundb.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/rundb.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/rundb.dir/main.cpp.o"
 	/usr/bin/g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/rundb.dir/main.cpp.o -MF CMakeFiles/rundb.dir/main.cpp.o.d -o CMakeFiles/rundb.dir/main.cpp.o -c /home/cht/Tree-DB/main.cpp
 
 CMakeFiles/rundb.dir/main.cpp.i: cmake_force
@@ -430,7 +430,7 @@ rundb: CMakeFiles/rundb.dir/main.cpp.o
 rundb: CMakeFiles/rundb.dir/build.make
 rundb: /home/cht/Tree-DB/Storage/libs/libjemalloc.a
 rundb: CMakeFiles/rundb.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cht/Tree-DB/build-tree-db-g11/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Linking CXX executable rundb"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cht/Tree-DB/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Linking CXX executable rundb"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/rundb.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -442,6 +442,6 @@ CMakeFiles/rundb.dir/clean:
 .PHONY : CMakeFiles/rundb.dir/clean
 
 CMakeFiles/rundb.dir/depend:
-	cd /home/cht/Tree-DB/build-tree-db-g11 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/cht/Tree-DB /home/cht/Tree-DB /home/cht/Tree-DB/build-tree-db-g11 /home/cht/Tree-DB/build-tree-db-g11 /home/cht/Tree-DB/build-tree-db-g11/CMakeFiles/rundb.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/cht/Tree-DB/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/cht/Tree-DB /home/cht/Tree-DB /home/cht/Tree-DB/build /home/cht/Tree-DB/build /home/cht/Tree-DB/build/CMakeFiles/rundb.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/rundb.dir/depend
 

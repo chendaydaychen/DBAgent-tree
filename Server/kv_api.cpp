@@ -214,6 +214,16 @@ Rc put(TxnHandle &h, const std::string &key, const std::string &value) {
 
 }
 
+Rc put_many(TxnHandle &h, const std::vector<std::pair<std::string, std::string>> &requests) {
+    for (const auto &request : requests) {
+        Rc rc = put(h, request.first, request.second);
+        if (rc != Rc::OK) {
+            return rc;
+        }
+    }
+    return Rc::OK;
+}
+
 Rc tree_create_branch(TxnHandle &h, uint32_t parent_branch_id, uint32_t &branch_id_out) {
     branch_id_out = UINT32_MAX;
     if (!h.impl) return Rc::ERROR;
